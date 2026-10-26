@@ -37,3 +37,15 @@ def test_game_status():
   "game": "CaseCraft",
   "status": "in development"
 }
+    
+def test_get_case_by_id():
+    response = client.get("/cases/2")
+    
+    assert response.status_code == 200
+    assert response.json()["title"] == "The Silent Witness"
+    
+def test_get_case_not_found():
+    response = client.get("/cases/99")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Case not found"
