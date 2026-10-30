@@ -14,7 +14,23 @@ class Suspect(BaseModel):
     case_id: int
     name: str
     description: str
+
+
+class SuspectInternal(Suspect):
     is_guilty: bool
+    
+class Clue(BaseModel):
+    id: int
+    case_id: int
+    title: str
+    description: str
+    is_important: bool
+
+class Investigation(BaseModel):
+    id: int
+    case_id: int
+    clue_id: int
+    is_discovered: bool
     
 app = FastAPI(
     title="CaseCraft API",
@@ -124,14 +140,140 @@ suspects = [
         },
 ]
 
+clues = [
+    {
+        "id": 1,
+        "case_id": 1,
+        "title": "Broken Glass",
+        "description": "A broken glass piece was found near the diamond display.",
+        "is_important": True,
+    },
+    {
+        "id": 2,
+        "case_id": 1,
+        "title": "Security Footage",
+        "description": "A suspicious person was seen near the museum room.",
+        "is_important": True,
+    },
+    {
+        "id": 3,
+        "case_id": 1,
+        "title": "Visitor Register",
+        "description": "The visitor register contains unusual entries.",
+        "is_important": False,
+    },
+    {
+        "id": 4,
+        "case_id": 2,
+        "title": "Last Phone Call",
+        "description": "The missing witness received a mysterious phone call.",
+        "is_important": True,
+    },
+]
+
+investigations = [
+    {
+        "id": 1,
+        "case_id": 1,
+        "clue_id": 1,
+        "is_discovered": True,
+    },
+    {
+        "id": 2,
+        "case_id": 1,
+        "clue_id": 2,
+        "is_discovered": False,
+    },
+    {
+        "id": 3,
+        "case_id": 1,
+        "clue_id": 3,
+        "is_discovered": False,
+    },
+    {
+        "id": 4,
+        "case_id": 2,
+        "clue_id": 4,
+        "is_discovered": True,
+    },
+]
+
 @app.get("/suspects", response_model=list[Suspect])
 def get_suspects():
     return suspects
 
+@app.get("/clues",response_model=list[Clue])
+def get_clues():
+    return clues
+
+@app.get("/clues/{clue_id}", response_model=Clue)
+def get_clue(clue_id: int):
+
+    for clue in clues:
+        if clue["id"] == clue_id:
+            return clue
+
+    raise HTTPException(
+        status_code=404,
+        detail="Clue not found"
+    )
+    
 @app.get("/cases/{case_id}/suspects", response_model=list[Suspect])
 def get_case_suspects(case_id: int):
+
+    case_exists = any(
+        case["id"] == case_id
+        for case in get_cases()
+    )
+
+    if not case_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Case not found"
+        )
+
     return [
         suspect
         for suspect in suspects
         if suspect["case_id"] == case_id
+    ]
+
+@app.get("/cases/{case_id}/clues", response_model=list[Clue])
+def get_case_clues(case_id: int):
+
+    case_exists = any(
+        case["id"] == case_id
+        for case in get_cases()
+    )
+
+    if not case_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Case not found"
+        )
+
+    return [
+        clue
+        for clue in clues
+        if clue["case_id"] == case_id
+    ]    
+
+@app.get("/cases/{case_id}/investigation",response_model=list[Investigation])
+def get_investigation_progress(case_id: int):
+
+    case_exists = any(
+        case["id"] == case_id
+        for case in get_cases()
+    )
+
+    if not case_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Case not found"
+        )
+
+    return [
+        investigation
+        for investigation in investigations
+        if investigation["case_id"] == case_id
     ]

@@ -69,3 +69,92 @@ def test_get_suspects_for_case_2():
         suspect["case_id"] == 2
         for suspect in response.json()
     )
+    
+def test_suspects_for_nonexistent_case():
+    response = client.get("/cases/99/suspects")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Case not found"
+    
+def test_get_all_clues():
+    response = client.get("/clues")
+    assert response.status_code == 200
+    assert len(response.json()) == 4
+
+
+def test_get_clues_by_case_id():
+    response = client.get("/cases/1/clues")
+    assert response.status_code == 200
+    assert len(response.json()) == 3
+    assert all(
+        clue["case_id"] == 1
+        for clue in response.json()
+    )
+
+
+def test_get_clues_for_case_without_clues():
+    response = client.get("/cases/3/clues")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_get_clues_for_nonexistent_case():
+    response = client.get("/cases/99/clues")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Case not found"
+    
+def test_suspects_api_hides_guilty_status():
+    response = client.get("/suspects")
+
+    assert response.status_code == 200
+
+    for suspect in response.json():
+        assert "is_guilty" not in suspect
+        
+def test_case_suspects_api_hides_guilty_status():
+    response = client.get("/cases/1/suspects")
+
+    assert response.status_code == 200
+
+    for suspect in response.json():
+        assert "is_guilty" not in suspect
+        
+def test_get_clue_by_id():
+    response = client.get("/clues/1")
+
+    assert response.status_code == 200
+    assert response.json()["title"] == "Broken Glass"
+
+
+def test_get_clue_not_found():
+    response = client.get("/clues/99")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Clue not found"
+
+def test_get_investigation_progress():
+    response = client.get("/cases/1/investigation")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 3
+
+
+def test_investigation_progress_for_case_2():
+    response = client.get("/cases/2/investigation")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+
+
+def test_investigation_progress_for_case_without_records():
+    response = client.get("/cases/3/investigation")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_investigation_for_nonexistent_case():
+    response = client.get("/cases/99/investigation")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Case not found"
