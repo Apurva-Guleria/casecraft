@@ -31,6 +31,16 @@ class Investigation(BaseModel):
     case_id: int
     clue_id: int
     is_discovered: bool
+
+class InvestigationUpdate(BaseModel):
+    is_discovered: bool
+     
+class InvestigationSummary(BaseModel):
+    case_id: int
+    total_clues: int
+    discovered_clues: int
+    remaining_clues: int
+    progress_percentage: float
     
 app = FastAPI(
     title="CaseCraft API",
@@ -277,3 +287,68 @@ def get_investigation_progress(case_id: int):
         for investigation in investigations
         if investigation["case_id"] == case_id
     ]
+  
+@app.get(
+    "/cases/{case_id}/investigation/summary",
+    response_model=InvestigationSummary
+)
+def get_investigation_summary(case_id: int):
+
+    case_exists = any(
+        case["id"] == case_id
+        for case in get_cases()
+    )
+
+    if not case_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Case not found"
+        )
+
+    case_investigations = [
+        investigation
+        for investigation in investigations
+        if investigation["case_id"] == case_id
+    ]
+
+    total_clues = len(case_investigations)
+
+    discovered_clues = sum(
+        1 for investigation in case_investigations
+        if investigation["is_discovered"]
+    )
+
+    remaining_clues = total_clues - discovered_clues
+
+    progress_percentage = (
+        (discovered_clues / total_clues) * 100
+        if total_clues > 0 else 0
+    )
+
+    return {
+        "case_id": case_id,
+        "total_clues": total_clues,
+        "discovered_clues": discovered_clues,
+        "remaining_clues": remaining_clues,
+        "progress_percentage": round(progress_percentage, 2)
+    }
+      
+@app.patch("/cases/{case_id}/investigation/{clue_id}",response_model = Investigation)
+def update_investigation(
+    case_id:int,
+    clue_id:int,
+    update_data:InvestigationUpdate
+):
+    for investigation in investigations:
+        if(
+            investigation["case_id"] == case_id
+            and investigation["clue_id"] == clue_id
+        ):
+            investigation["is_discovered"] = update_data.is_discovered
+            return investigation
+    
+    raise HTTPException(
+        status_code = 404,
+        detail = "Investigation record not found"
+    )
+            

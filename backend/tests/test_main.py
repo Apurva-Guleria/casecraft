@@ -158,3 +158,49 @@ def test_investigation_for_nonexistent_case():
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Case not found"
+    
+def test_mark_clue_as_discovered():
+    response = client.patch(
+        "/cases/1/investigation/2",
+        json={"is_discovered": True}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["is_discovered"] is True
+    
+def test_update_nonexistent_investigation():
+    response = client.patch(
+        "/cases/99/investigation/99",
+        json={"is_discovered": True}
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Investigation record not found"
+    
+def test_investigation_summary():
+    response = client.get("/cases/1/investigation/summary")
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["total_clues"] == 3
+    assert data["discovered_clues"] == 2
+    assert data["remaining_clues"] == 1
+    assert data["progress_percentage"] == 66.67
+    
+def test_investigation_summary_without_records():
+    response = client.get("/cases/3/investigation/summary")
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["total_clues"] == 0
+    assert data["discovered_clues"] == 0
+    assert data["remaining_clues"] == 0
+    assert data["progress_percentage"] == 0
+    
+def test_investigation_summary_not_found():
+    response = client.get("/cases/99/investigation/summary")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Case not found"
