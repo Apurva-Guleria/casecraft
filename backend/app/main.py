@@ -1,7 +1,8 @@
 
 from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
-
+from backend.app.database import Base, engine,SessionLocal
+from backend.app.models import CaseDB
 
 class Case(BaseModel):
     id: int
@@ -41,13 +42,50 @@ class InvestigationSummary(BaseModel):
     discovered_clues: int
     remaining_clues: int
     progress_percentage: float
-    
+
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title="CaseCraft API",
     description="Backend API for the CaseCraft mystery investigation game.",
     version="0.1.0",
 )
 
+def seed_cases():
+    db = SessionLocal()
+
+    try:
+        existing_cases = db.query(CaseDB).count()
+
+        if existing_cases == 0:
+            sample_cases = [
+                CaseDB(
+                    id=1,
+                    title="The Missing Diamond",
+                    description="A priceless diamond has disappeared from a museum.",
+                    difficulty="Easy"
+                ),
+                CaseDB(
+                    id=2,
+                    title="The Silent Witness",
+                    description="A key witness has mysteriously disappeared before giving evidence in a major case.",
+                    difficulty="Medium"
+                ),
+                CaseDB(
+                    id=3,
+                    title="The Midnight Murder",
+                    description="A wealthy businessman has been found murdered in his mansion. Find the killer by examining clues and questioning suspects.",
+                    difficulty="Hard"
+                )
+            ]
+
+            db.add_all(sample_cases)
+            db.commit()
+
+    finally:
+        db.close()
+
+seed_cases()
 
 @app.get("/")
 def home():
@@ -79,39 +117,44 @@ def game_status():
     
 @app.get("/cases", response_model=list[Case])
 def get_cases():
-    return [
-        {
-            "id":1,
-            "title":"The Missing Diamond",
-            "description":"A priceless diamond has disappeared from a museum.",
-            "difficulty":"Easy"
-        },
-        {
-                    "id":2,
-                    "title":"The Silent Witness",
-                    "description": "A key witness has mysteriously disappeared before giving evidence in a major case.",
-                    "difficulty":"Medium"
-                },
-        {
-                    "id":3,
-                    "title":"The Midnight Murder",
-                    "description": "A wealthy businessman has been found murdered in his mansion. Find the killer by examining clues and questioning suspects.",
-                    "difficulty":"Hard"
-                }
-    ]
-    
+    db = SessionLocal()
 
+    try:
+        cases = db.query(CaseDB).all()
+        return cases
+    finally:
+        db.close()
+
+def case_exists(case_id: int):
+    db = SessionLocal()
+
+    try:
+        return db.query(CaseDB).filter(
+            CaseDB.id == case_id
+        ).first() is not None
+
+    finally:
+        db.close()
+        
 @app.get("/cases/{case_id}", response_model=Case)
 def get_case(case_id: int):
-    for case in get_cases():
-        if case["id"] == case_id:
-            return case
+    db = SessionLocal()
 
-    raise HTTPException(
-    status_code=404,
-    detail="Case not found"
-)
+    try:
+        case = db.query(CaseDB).filter(
+            CaseDB.id == case_id
+        ).first()
 
+        if case is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Case not found"
+            )
+
+        return case
+
+    finally:
+        db.close()
 suspects = [
     {
         "id": 1,
@@ -231,12 +274,7 @@ def get_clue(clue_id: int):
 @app.get("/cases/{case_id}/suspects", response_model=list[Suspect])
 def get_case_suspects(case_id: int):
 
-    case_exists = any(
-        case["id"] == case_id
-        for case in get_cases()
-    )
-
-    if not case_exists:
+    if not case_exists(case_id):
         raise HTTPException(
             status_code=404,
             detail="Case not found"
@@ -251,12 +289,7 @@ def get_case_suspects(case_id: int):
 @app.get("/cases/{case_id}/clues", response_model=list[Clue])
 def get_case_clues(case_id: int):
 
-    case_exists = any(
-        case["id"] == case_id
-        for case in get_cases()
-    )
-
-    if not case_exists:
+    if not case_exists(case_id):
         raise HTTPException(
             status_code=404,
             detail="Case not found"
@@ -271,12 +304,7 @@ def get_case_clues(case_id: int):
 @app.get("/cases/{case_id}/investigation",response_model=list[Investigation])
 def get_investigation_progress(case_id: int):
 
-    case_exists = any(
-        case["id"] == case_id
-        for case in get_cases()
-    )
-
-    if not case_exists:
+    if not case_exists(case_id):
         raise HTTPException(
             status_code=404,
             detail="Case not found"
@@ -294,12 +322,7 @@ def get_investigation_progress(case_id: int):
 )
 def get_investigation_summary(case_id: int):
 
-    case_exists = any(
-        case["id"] == case_id
-        for case in get_cases()
-    )
-
-    if not case_exists:
+    if not case_exists(case_id):
         raise HTTPException(
             status_code=404,
             detail="Case not found"
