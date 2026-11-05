@@ -2,7 +2,7 @@
 from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 from backend.app.database import Base, engine,SessionLocal
-from backend.app.models import CaseDB
+from backend.app.models import CaseDB, SuspectDB
 
 class Case(BaseModel):
     id: int
@@ -81,6 +81,49 @@ def seed_cases():
 
             db.add_all(sample_cases)
             db.commit()
+        existing_suspects = db.query(SuspectDB).count()
+
+        if existing_suspects == 0:
+            sample_suspects = [
+                SuspectDB(
+                    id=1,
+                    case_id=1,
+                    name="Mr. Sharma",
+                    description="The museum manager who had access to the diamond room.",
+                    is_guilty=False
+                ),
+                SuspectDB(
+                    id=2,
+                    case_id=1,
+                    name="Riya Malhotra",
+                    description="A museum employee who was seen near the room.",
+                    is_guilty=True
+                ),
+                SuspectDB(
+                    id=3,
+                    case_id=1,
+                    name="Arjun Mehta",
+                    description="A security guard responsible for the night shift.",
+                    is_guilty=False
+                ),
+                SuspectDB(
+                    id=4,
+                    case_id=2,
+                    name="Vikram Sethi",
+                    description="A colleague who was the last person to see the missing witness.",
+                    is_guilty=False
+                ),
+                SuspectDB(
+                    id=5,
+                    case_id=2,
+                    name="Neha Kapoor",
+                    description="A close friend who may know why the witness disappeared.",
+                    is_guilty=True
+                )
+            ]
+
+            db.add_all(sample_suspects)
+            db.commit()
 
     finally:
         db.close()
@@ -155,43 +198,6 @@ def get_case(case_id: int):
 
     finally:
         db.close()
-suspects = [
-    {
-        "id": 1,
-        "case_id":1,
-        "name": "Mr. Sharma",
-        "description": "The museum manager who had access to the diamond room.",
-        "is_guilty": False,
-    },
-    {
-        "id": 2,
-        "case_id":1,
-        "name": "Riya Malhotra",
-        "description": "A museum employee who was seen near the room.",
-        "is_guilty": True,
-    },
-    {
-        "id": 3,
-        "case_id":1,
-        "name": "Arjun Mehta",
-        "description": "A security guard responsible for the night shift.",
-        "is_guilty": False,
-    },
-    {
-            "id": 4,
-            "case_id": 2,
-            "name": "Vikram Sethi",
-            "description": "A colleague who was the last person to see the missing witness.",
-            "is_guilty": False,
-        },
-        {
-            "id": 5,
-            "case_id": 2,
-            "name": "Neha Kapoor",
-            "description": "A close friend who may know why the witness disappeared.",
-            "is_guilty": True,
-        },
-]
 
 clues = [
     {
@@ -253,7 +259,12 @@ investigations = [
 
 @app.get("/suspects", response_model=list[Suspect])
 def get_suspects():
-    return suspects
+    db = SessionLocal()
+
+    try:
+        return db.query(SuspectDB).all()
+    finally:
+        db.close()
 
 @app.get("/clues",response_model=list[Clue])
 def get_clues():
@@ -273,19 +284,22 @@ def get_clue(clue_id: int):
     
 @app.get("/cases/{case_id}/suspects", response_model=list[Suspect])
 def get_case_suspects(case_id: int):
+    db = SessionLocal()
 
-    if not case_exists(case_id):
-        raise HTTPException(
-            status_code=404,
-            detail="Case not found"
-        )
+    try:
+        if not db.query(CaseDB).filter(CaseDB.id == case_id).first():
+            raise HTTPException(
+                status_code=404,
+                detail="Case not found"
+            )
 
-    return [
-        suspect
-        for suspect in suspects
-        if suspect["case_id"] == case_id
-    ]
+        return db.query(SuspectDB).filter(
+            SuspectDB.case_id == case_id
+        ).all()
 
+    finally:
+        db.close()
+        
 @app.get("/cases/{case_id}/clues", response_model=list[Clue])
 def get_case_clues(case_id: int):
 
