@@ -1,8 +1,7 @@
-
 from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 from backend.app.database import Base, engine,SessionLocal
-from backend.app.models import CaseDB, SuspectDB
+from backend.app.models import CaseDB, SuspectDB,ClueDB,InvestigationDB
 
 class Case(BaseModel):
     id: int
@@ -124,6 +123,76 @@ def seed_cases():
 
             db.add_all(sample_suspects)
             db.commit()
+            
+        existing_clues = db.query(ClueDB).count()
+
+        if existing_clues == 0:
+            sample_clues = [
+                ClueDB(
+                    id=1,
+                    case_id=1,
+                    title="Broken Glass",
+                    description="A broken glass piece was found near the diamond display.",
+                    is_important=True
+                ),
+                ClueDB(
+                    id=2,
+                    case_id=1,
+                    title="Security Footage",
+                    description="A suspicious person was seen near the museum room.",
+                    is_important=True
+                ),
+                ClueDB(
+                    id=3,
+                    case_id=1,
+                    title="Visitor Register",
+                    description="The visitor register contains unusual entries.",
+                    is_important=False
+                ),
+                ClueDB(
+                    id=4,
+                    case_id=2,
+                    title="Last Phone Call",
+                    description="The missing witness received a mysterious phone call.",
+                    is_important=True
+                )
+            ]
+
+            db.add_all(sample_clues)
+            db.commit()
+            
+        existing_investigations = db.query(InvestigationDB).count()
+
+        if existing_investigations == 0:
+            sample_investigations = [
+                InvestigationDB(
+                    id=1,
+                    case_id=1,
+                    clue_id=1,
+                    is_discovered=True
+                ),
+                InvestigationDB(
+                    id=2,
+                    case_id=1,
+                    clue_id=2,
+                    is_discovered=False
+                ),
+                InvestigationDB(
+                    id=3,
+                    case_id=1,
+                    clue_id=3,
+                    is_discovered=False
+                ),
+                InvestigationDB(
+                    id=4,
+                    case_id=2,
+                    clue_id=4,
+                    is_discovered=True
+                )
+            ]
+
+            db.add_all(sample_investigations)
+            db.commit()
 
     finally:
         db.close()
@@ -199,63 +268,6 @@ def get_case(case_id: int):
     finally:
         db.close()
 
-clues = [
-    {
-        "id": 1,
-        "case_id": 1,
-        "title": "Broken Glass",
-        "description": "A broken glass piece was found near the diamond display.",
-        "is_important": True,
-    },
-    {
-        "id": 2,
-        "case_id": 1,
-        "title": "Security Footage",
-        "description": "A suspicious person was seen near the museum room.",
-        "is_important": True,
-    },
-    {
-        "id": 3,
-        "case_id": 1,
-        "title": "Visitor Register",
-        "description": "The visitor register contains unusual entries.",
-        "is_important": False,
-    },
-    {
-        "id": 4,
-        "case_id": 2,
-        "title": "Last Phone Call",
-        "description": "The missing witness received a mysterious phone call.",
-        "is_important": True,
-    },
-]
-
-investigations = [
-    {
-        "id": 1,
-        "case_id": 1,
-        "clue_id": 1,
-        "is_discovered": True,
-    },
-    {
-        "id": 2,
-        "case_id": 1,
-        "clue_id": 2,
-        "is_discovered": False,
-    },
-    {
-        "id": 3,
-        "case_id": 1,
-        "clue_id": 3,
-        "is_discovered": False,
-    },
-    {
-        "id": 4,
-        "case_id": 2,
-        "clue_id": 4,
-        "is_discovered": True,
-    },
-]
 
 @app.get("/suspects", response_model=list[Suspect])
 def get_suspects():
@@ -266,21 +278,32 @@ def get_suspects():
     finally:
         db.close()
 
-@app.get("/clues",response_model=list[Clue])
+@app.get("/clues", response_model=list[Clue])
 def get_clues():
-    return clues
+    db = SessionLocal()
+
+    try:
+        return db.query(ClueDB).all()
+    finally:
+        db.close()
 
 @app.get("/clues/{clue_id}", response_model=Clue)
 def get_clue(clue_id: int):
+    db = SessionLocal()
+    try:
+        clue = db.query(ClueDB).filter(
+            ClueDB.id == clue_id
+        ).first()
 
-    for clue in clues:
-        if clue["id"] == clue_id:
-            return clue
+        if clue is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Clue not found"
+            )
 
-    raise HTTPException(
-        status_code=404,
-        detail="Clue not found"
-    )
+        return clue
+    finally:
+        db.close()
     
 @app.get("/cases/{case_id}/suspects", response_model=list[Suspect])
 def get_case_suspects(case_id: int):
@@ -302,90 +325,120 @@ def get_case_suspects(case_id: int):
         
 @app.get("/cases/{case_id}/clues", response_model=list[Clue])
 def get_case_clues(case_id: int):
+    db = SessionLocal()
+    try:
+        case = db.query(CaseDB).filter(
+            CaseDB.id == case_id
+        ).first()
 
-    if not case_exists(case_id):
-        raise HTTPException(
-            status_code=404,
-            detail="Case not found"
-        )
+        if case is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Case not found"
+            )
 
-    return [
-        clue
-        for clue in clues
-        if clue["case_id"] == case_id
-    ]    
+        return db.query(ClueDB).filter(
+            ClueDB.case_id == case_id
+        ).all()
 
-@app.get("/cases/{case_id}/investigation",response_model=list[Investigation])
+    finally:
+        db.close()
+
+@app.get("/cases/{case_id}/investigation", response_model=list[Investigation])
 def get_investigation_progress(case_id: int):
+    db = SessionLocal()
 
-    if not case_exists(case_id):
-        raise HTTPException(
-            status_code=404,
-            detail="Case not found"
-        )
+    try:
+        case = db.query(CaseDB).filter(
+            CaseDB.id == case_id
+        ).first()
 
-    return [
-        investigation
-        for investigation in investigations
-        if investigation["case_id"] == case_id
-    ]
-  
-@app.get(
-    "/cases/{case_id}/investigation/summary",
-    response_model=InvestigationSummary
-)
+        if case is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Case not found"
+            )
+
+        return db.query(InvestigationDB).filter(
+            InvestigationDB.case_id == case_id
+        ).all()
+
+    finally:
+        db.close()
+@app.get("/cases/{case_id}/investigation/summary", response_model=InvestigationSummary)
 def get_investigation_summary(case_id: int):
 
-    if not case_exists(case_id):
-        raise HTTPException(
-            status_code=404,
-            detail="Case not found"
+    db = SessionLocal()
+
+    try:
+        case = db.query(CaseDB).filter(
+            CaseDB.id == case_id
+        ).first()
+
+        if case is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Case not found"
+            )
+
+        case_investigations = db.query(InvestigationDB).filter(
+            InvestigationDB.case_id == case_id
+        ).all()
+
+        total_clues = len(case_investigations)
+
+        discovered_clues = sum(
+            1 for investigation in case_investigations
+            if investigation.is_discovered
         )
 
-    case_investigations = [
-        investigation
-        for investigation in investigations
-        if investigation["case_id"] == case_id
-    ]
+        remaining_clues = total_clues - discovered_clues
 
-    total_clues = len(case_investigations)
+        progress_percentage = (
+            (discovered_clues / total_clues) * 100
+            if total_clues > 0 else 0
+        )
 
-    discovered_clues = sum(
-        1 for investigation in case_investigations
-        if investigation["is_discovered"]
-    )
+        return {
+            "case_id": case_id,
+            "total_clues": total_clues,
+            "discovered_clues": discovered_clues,
+            "remaining_clues": remaining_clues,
+            "progress_percentage": round(progress_percentage, 2)
+        }
 
-    remaining_clues = total_clues - discovered_clues
-
-    progress_percentage = (
-        (discovered_clues / total_clues) * 100
-        if total_clues > 0 else 0
-    )
-
-    return {
-        "case_id": case_id,
-        "total_clues": total_clues,
-        "discovered_clues": discovered_clues,
-        "remaining_clues": remaining_clues,
-        "progress_percentage": round(progress_percentage, 2)
-    }
+    finally:
+        db.close()
       
-@app.patch("/cases/{case_id}/investigation/{clue_id}",response_model = Investigation)
+@app.patch(
+    "/cases/{case_id}/investigation/{clue_id}",
+    response_model=Investigation
+)
 def update_investigation(
-    case_id:int,
-    clue_id:int,
-    update_data:InvestigationUpdate
+    case_id: int,
+    clue_id: int,
+    update_data: InvestigationUpdate
 ):
-    for investigation in investigations:
-        if(
-            investigation["case_id"] == case_id
-            and investigation["clue_id"] == clue_id
-        ):
-            investigation["is_discovered"] = update_data.is_discovered
-            return investigation
-    
-    raise HTTPException(
-        status_code = 404,
-        detail = "Investigation record not found"
-    )
-            
+    db = SessionLocal()
+
+    try:
+        investigation = db.query(InvestigationDB).filter(
+            InvestigationDB.case_id == case_id,
+            InvestigationDB.clue_id == clue_id
+        ).first()
+
+        if investigation is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Investigation record not found"
+            )
+
+        investigation.is_discovered = update_data.is_discovered
+
+        db.commit()
+        db.refresh(investigation)
+
+        return investigation
+
+    finally:
+        db.close()
