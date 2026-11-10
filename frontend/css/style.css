@@ -1,0 +1,694 @@
+/* ==============================
+   1. GLOBAL RESET
+================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Georgia, serif;
+    background: #080b10;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+/* ==============================
+   2. GAME CONTAINER
+================================= */
+
+#game-container {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* ==============================
+   3. GAME SCREEN
+================================= */
+
+.screen {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* ==============================
+   4. MAIN MENU ATMOSPHERE
+================================= */
+
+/* ==============================
+   4. MAIN MENU ATMOSPHERE
+================================= */
+
+#main-menu {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    background:
+        linear-gradient(
+            rgba(5, 10, 18, 0.35),
+            rgba(5, 10, 18, 0.65)
+        ),
+        url("../assets/mansion-bg.jpeg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* ==============================
+   5. MENU CONTENT
+================================= */
+
+.menu-content {
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+    padding: 30px 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    animation: menu-entrance 1.2s ease-out;
+}
+
+@keyframes menu-entrance {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.game-title {
+    font-family: Georgia, serif;
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    font-weight: bold;
+
+    letter-spacing: clamp(6px, 1.5vw, 14px);
+
+    color: #e8d7b0;
+
+    text-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(218, 190, 140, 0.4),
+        0 0 50px rgba(218, 190, 140, 0.2);
+}
+
+
+.game-tagline {
+    margin-top: 18px;
+    margin-bottom: 55px;
+    color: #a9adb3;
+    font-size: 1rem;
+    letter-spacing: 2px;
+}
+
+/* ==============================
+   6. MENU BUTTONS
+================================= */
+
+
+/* ==============================
+   CINEMATIC GAME BUTTONS
+================================= */
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.menu-buttons button {
+    position: relative;
+    width: 280px;
+    padding: 17px 20px;
+
+    background: rgba(8, 11, 16, 0.55);
+    border: 1px solid rgba(201, 171, 116, 0.65);
+
+    color: #e8d7b0;
+
+    font-family: Georgia, serif;
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 3px;
+
+    cursor: pointer;
+    transition: all 0.35s ease;
+}
+
+/* Primary button */
+
+#new-game-btn {
+    background: rgba(165, 139, 97, 0.85);
+    color: #080b10;
+    border-color: #d5b77e;
+}
+
+/* Hover effects */
+
+.menu-buttons button:hover {
+    transform: translateY(-3px);
+    border-color: #f0d49e;
+    box-shadow: 0 0 25px rgba(218, 190, 140, 0.3);
+}
+
+#new-game-btn:hover {
+    background: #e8d7b0;
+}
+
+/* Keyboard accessibility */
+
+.menu-buttons button:focus-visible {
+    outline: 2px solid #e8d7b0;
+    outline-offset: 5px;
+}
+
+
+
+/* ==============================
+   7. CINEMATIC ATMOSPHERE
+================================= */
+
+#main-menu {
+    isolation: isolate;
+}
+
+/* Atmospheric fog and light */
+
+#main-menu::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            ellipse at 20% 60%,
+            rgba(120, 135, 150, 0.12),
+            transparent 45%
+        ),
+        radial-gradient(
+            ellipse at 80% 30%,
+            rgba(165, 139, 97, 0.10),
+            transparent 40%
+        );
+
+    filter: blur(35px);
+    animation: fog-drift 12s ease-in-out infinite alternate;
+}
+
+/* Dark cinematic vignette */
+
+#main-menu::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background: radial-gradient(
+        ellipse at center,
+        transparent 30%,
+        rgba(0, 0, 0, 0.65) 100%
+    );
+}
+
+/* Slow atmospheric movement */
+
+@keyframes fog-drift {
+    from {
+        transform: translateX(-2%) translateY(1%);
+    }
+
+    to {
+        transform: translateX(2%) translateY(-1%);
+    }
+}
+
+
+
+/* =================================
+   8. CASE BRIEFING SCREEN
+================================= */
+
+#briefing-screen {
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+
+    background:
+        linear-gradient(
+            rgba(4, 8, 14, 0.78),
+            rgba(4, 8, 14, 0.88)
+        ),
+        url("../assets/mansion-bg.jpeg");
+
+    background-size: cover;
+    background-position: center;
+}
+
+/* Briefing content panel */
+
+.briefing-content {
+    width: min(750px, 100%);
+    padding: 55px 45px;
+
+    background: rgba(10, 15, 22, 0.88);
+
+    border: 1px solid rgba(201, 171, 116, 0.4);
+
+    box-shadow:
+        0 20px 80px rgba(0, 0, 0, 0.7),
+        inset 0 0 40px rgba(165, 139, 97, 0.04);
+
+    text-align: left;
+
+    animation: briefing-entrance 0.8s ease-out;
+}
+
+/* Case number */
+
+.chapter-label {
+    color: #c5a875;
+    font-size: 0.85rem;
+    letter-spacing: 5px;
+    margin-bottom: 25px;
+}
+
+/* Case title */
+
+#case-title {
+    color: #e8d7b0;
+    font-family: Georgia, serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: 3px;
+    line-height: 1.2;
+}
+
+/* Decorative divider */
+
+.briefing-divider {
+    width: 100px;
+    height: 2px;
+    background: #a58b61;
+    margin: 30px 0;
+}
+
+/* Case description */
+
+#case-description {
+    color: #b9bec6;
+    font-size: 1.1rem;
+    line-height: 2;
+    max-width: 600px;
+    margin-bottom: 40px;
+}
+
+/* Start investigation button */
+
+#start-investigation-btn {
+    padding: 17px 28px;
+
+    background: #a58b61;
+    border: 1px solid #d5b77e;
+
+    color: #080b10;
+
+    font-family: Georgia, serif;
+    font-weight: bold;
+    letter-spacing: 2px;
+
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#start-investigation-btn:hover {
+    background: #e8d7b0;
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px rgba(218, 190, 140, 0.25);
+}
+
+/* Entrance animation */
+
+@keyframes briefing-entrance {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+/* =================================
+   9. CRIME SCENE SCREEN
+================================= */
+
+#crime-scene-screen {
+    flex-direction: column;
+    padding: 30px 4%;
+    gap: 30px;
+
+    background: #080b10;
+    overflow-y: auto;
+}
+
+/* Scene header */
+
+.scene-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(201, 171, 116, 0.3);
+}
+
+.scene-header h1 {
+    color: #e8d7b0;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    letter-spacing: 3px;
+}
+
+.scene-status {
+    text-align: right;
+}
+
+.scene-status span {
+    color: #9299a3;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+}
+
+.scene-status p {
+    color: #c5a875;
+    margin-top: 8px;
+    letter-spacing: 2px;
+}
+
+/* Main scene layout */
+
+.scene-content {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 25px;
+    min-height: 500px;
+}
+
+/* Crime scene image */
+
+.scene-image-container {
+    position: relative;
+    min-height: 500px;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.85),
+            transparent 60%
+        ),
+        url("../assets/crime-scene-1.jpeg");
+
+    background-size: cover;
+    background-position: center;
+
+    border: 1px solid rgba(201, 171, 116, 0.3);
+}
+
+/* Scene description */
+
+.scene-overlay {
+    position: absolute;
+    bottom: 35px;
+    left: 35px;
+}
+
+.scene-overlay p {
+    color: #c5a875;
+    letter-spacing: 4px;
+    font-size: 0.8rem;
+}
+
+.scene-overlay h2 {
+    color: #ffffff;
+    margin-top: 12px;
+    font-size: 1.7rem;
+    font-weight: normal;
+}
+
+/* Investigation panel */
+
+
+.investigation-panel {
+    padding: 25px;
+
+    background: #111923;
+    border: 1px solid rgba(201, 171, 116, 0.25);
+
+    height: 500px;
+    overflow-y: auto;
+    min-height: 0;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.investigation-panel::-webkit-scrollbar {
+    display: none;
+}
+
+/* Clue counter */
+
+.clue-counter {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    margin-top: 35px;
+    padding: 18px 0;
+
+    border-top: 1px solid #343b45;
+    border-bottom: 1px solid #343b45;
+}
+
+.clue-counter span {
+    color: #a9adb3;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+}
+
+.clue-counter strong {
+    color: #d5b77e;
+    font-size: 1.7rem;
+}
+
+/* Responsive layout */
+
+@media (max-width: 800px) {
+    .scene-content {
+        grid-template-columns: 1fr;
+    }
+
+    .scene-header {
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .scene-image-container {
+        min-height: 350px;
+    }
+}
+
+
+/* =================================
+   10. EVIDENCE HOTSPOTS
+================================= */
+
+.evidence-hotspot {
+    position: absolute;
+    z-index: 3;
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 2px solid #d5b77e;
+    border-radius: 50%;
+
+    background: rgba(8, 11, 16, 0.8);
+    color: #e8d7b0;
+
+    font-size: 1.3rem;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 0 15px rgba(213, 183, 126, 0.4);
+
+    transition: all 0.3s ease;
+}
+
+.evidence-hotspot:hover {
+    transform: scale(1.2);
+
+    background: #d5b77e;
+    color: #080b10;
+
+    box-shadow: 0 0 25px rgba(213, 183, 126, 0.8);
+}
+
+/* Position: Empty diamond case */
+.evidence-hotspot[data-clue="diamond-case"] {
+    top: 42%;
+    left: 79%;
+}
+
+/* Position: Broken glass */
+.evidence-hotspot[data-clue="broken-glass"] {
+    top: 82%;
+    left: 77%;
+}
+
+/* Position: Overturned chair */
+.evidence-hotspot[data-clue="overturned-chair"] {
+    top: 69%;
+    left: 56%;
+}
+
+
+
+/* =================================
+   11. DISCOVERED EVIDENCE CARDS
+================================= */
+
+#discovered-clues {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.clue-card {
+    padding: 16px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(37, 43, 51, 0.95),
+        rgba(18, 25, 35, 0.95)
+    );
+
+    border-left: 3px solid #c9ab74;
+    border-top: 1px solid rgba(201, 171, 116, 0.2);
+
+    animation: clue-reveal 0.4s ease;
+}
+
+.clue-card h3 {
+    color: #e8d7b0;
+    font-size: 16px;
+    margin-bottom: 9px;
+}
+
+.clue-card p {
+    color: #aeb5bd;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+@keyframes clue-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Discovered hotspot */
+
+.evidence-hotspot.discovered {
+    background: #c9ab74;
+    color: #080b10;
+    border-color: #e8d7b0;
+    box-shadow: 0 0 18px rgba(201, 171, 116, 0.8);
+}
+
+
+/* =================================
+   12. EVIDENCE DISCOVERY NOTIFICATION
+================================= */
+
+#evidence-notification {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+
+    width: min(350px, 90%);
+    padding: 20px;
+
+    background: rgba(12, 18, 26, 0.97);
+    border: 1px solid #c9ab74;
+    border-left: 4px solid #d5b77e;
+
+    text-align: center;
+
+    z-index: 9999;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translate(-50%, -20px);
+
+    transition: all 0.4s ease;
+
+    pointer-events: none;
+}
+
+#evidence-notification.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+#evidence-notification span {
+    display: block;
+    color: #c5a875;
+    font-size: 10px;
+    letter-spacing: 3px;
+}
+
+#evidence-notification h3 {
+    color: #e8d7b0;
+    font-family: Georgia, serif;
+    font-size: 17px;
+    margin-top: 10px;
+}

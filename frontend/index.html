@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CaseCraft | Mystery Investigation</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <main id="game-container">
+
+        <section id="main-menu" class="screen active">
+
+            <div class="menu-content">
+
+                <h1 class="game-title">CASECRAFT</h1>
+
+                <p class="game-tagline">
+                    Every clue tells a story. Every suspect hides a secret.
+                </p>
+
+                <div class="menu-buttons">
+                    <button id="new-game-btn">NEW INVESTIGATION</button>
+                    <button id="continue-btn">CONTINUE</button>
+                </div>
+
+            </div>
+
+        </section>
+
+<!-- CASE BRIEFING SCREEN -->
+
+<section id="briefing-screen" class="screen">
+
+    <div class="briefing-content">
+
+        <p class="chapter-label">CASE FILE 001</p>
+
+        <h1 id="case-title">THE MISSING DIAMOND</h1>
+
+        <div class="briefing-divider"></div>
+
+        <p id="case-description">
+            A priceless diamond has disappeared from a
+            heavily guarded mansion. The doors were locked.
+            Nobody claims to have seen anything.
+            
+            But someone is hiding the truth.
+        </p>
+
+        <button id="start-investigation-btn">
+            BEGIN INVESTIGATION
+        </button>
+
+    </div>
+
+</section>
+
+<!-- CRIME SCENE SCREEN -->
+
+<section id="crime-scene-screen" class="screen">
+
+    <div class="scene-header">
+
+        <div>
+            <p class="chapter-label">INVESTIGATION 001</p>
+            <h1>THE MISSING DIAMOND</h1>
+        </div>
+
+        <div class="scene-status">
+            <span>LOCATION</span>
+            <p>THE GRAND MANSION</p>
+        </div>
+
+    </div>
+
+    <div class="scene-content">
+
+        <div class="scene-image-container">
+
+
+<!-- CLICKABLE EVIDENCE LOCATIONS -->
+
+<button
+    class="evidence-hotspot"
+    data-clue="diamond-case"
+    aria-label="Investigate empty diamond case"
+    title="Investigate">
+    <span>?</span>
+</button>
+
+<button
+    class="evidence-hotspot"
+    data-clue="broken-glass"
+    aria-label="Investigate broken glass"
+    title="Investigate">
+    <span>?</span>
+</button>
+
+<button
+    class="evidence-hotspot"
+    data-clue="overturned-chair"
+    aria-label="Investigate overturned chair"
+    title="Investigate">
+    <span>?</span>
+</button>
+
+
+            <div class="scene-overlay">
+                <p>THE CRIME SCENE</p>
+                <h2>Something is not right here...</h2>
+            </div>
+
+        </div>
+
+        <aside class="investigation-panel">
+
+            <h2>INVESTIGATION NOTES</h2>
+
+            <p>Explore the scene and search for evidence.</p>
+
+            <div class="clue-counter">
+                <span>CLUES DISCOVERED</span>
+                <strong id="clue-count">0 / 5</strong>
+            </div>
+
+            <div id="discovered-clues">
+                <!-- Discovered clues will appear here -->
+            </div>
+
+        </aside>
+
+    </div>
+
+</section>
+
+
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>
