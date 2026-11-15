@@ -1,10 +1,10 @@
 
 // ==================================
-// CASECRAFT - EVIDENCE INTERACTION
+// CASECRAFT - DYNAMIC EVIDENCE SYSTEM
 // ==================================
 
-const evidenceHotspots = document.querySelectorAll(
-    ".evidence-hotspot"
+const evidenceHotspotsContainer = document.getElementById(
+    "evidence-hotspots"
 );
 
 const discoveredCluesContainer = document.getElementById(
@@ -13,71 +13,81 @@ const discoveredCluesContainer = document.getElementById(
 
 const clueCount = document.getElementById("clue-count");
 
-// Evidence information
-const evidenceData = {
-    "diamond-case": {
-        title: "Empty Diamond Case",
-        description: "The diamond is missing, but the display case shows no obvious signs of forced entry."
-    },
-
-    "broken-glass": {
-        title: "Broken Glass",
-        description: "Several glass fragments lie scattered across the floor. Some pieces appear freshly broken."
-    },
-
-    "overturned-chair": {
-        title: "Overturned Chair",
-        description: "A chair has been knocked over. It may indicate a struggle or a hurried escape."
-    }
-};
-
-// Store discovered evidence
+// Store discovered evidence IDs
 const discoveredEvidence = new Set();
 
-// Handle evidence clicks
-evidenceHotspots.forEach((hotspot) => {
+// Load clues for the selected case
+function loadEvidence(clues) {
 
-    hotspot.addEventListener("click", () => {
+    // Clear previous case evidence
+    evidenceHotspotsContainer.innerHTML = "";
+    discoveredCluesContainer.innerHTML = "";
+    discoveredEvidence.clear();
 
-        const clueId = hotspot.dataset.clue;
+    // Update total clue counter
+    clueCount.textContent = `0 / ${clues.length}`;
 
-        // Prevent duplicate discoveries
-        if (discoveredEvidence.has(clueId)) {
-            return;
-        }
+    clues.forEach((clue, index) => {
 
-        const evidence = evidenceData[clueId];
+        // Create hotspot
+        const hotspot = document.createElement("button");
 
-        if (!evidence) return;
+        hotspot.classList.add("evidence-hotspot");
 
-        discoveredEvidence.add(clueId);
+        hotspot.dataset.clue = clue.id;
+        hotspot.title = `Investigate ${clue.title}`;
+        hotspot.setAttribute(
+            "aria-label",
+            `Investigate ${clue.title}`
+        );
 
-        // Display discovered evidence
-        const clueCard = document.createElement("div");
+        hotspot.innerHTML = "<span>?</span>";
 
-        clueCard.classList.add("clue-card");
+        // Handle evidence discovery
+        hotspot.addEventListener("click", () => {
 
-        clueCard.innerHTML = `
-            <h3>${evidence.title}</h3>
-            <p>${evidence.description}</p>
-        `;
+            if (discoveredEvidence.has(clue.id)) {
+                return;
+            }
 
-        discoveredCluesContainer.appendChild(clueCard);
+            discoveredEvidence.add(clue.id);
 
-        // Update evidence counter
-        clueCount.textContent = discoveredEvidence.size;
+            // Create evidence card
+            const clueCard = document.createElement("div");
 
-        // Mark hotspot as discovered
-        hotspot.classList.add("discovered");
+            clueCard.classList.add("clue-card");
 
-        console.log("Evidence collected:", evidence.title);
+            const title = document.createElement("h3");
+            title.textContent = clue.title;
 
-        // Show evidence discovery notification
-        showEvidenceNotification(evidence.title);
+            const description = document.createElement("p");
+            description.textContent = clue.description;
+
+            clueCard.append(title, description);
+
+            discoveredCluesContainer.appendChild(clueCard);
+
+            // Update counter
+            clueCount.textContent =
+                `${discoveredEvidence.size} / ${clues.length}`;
+
+            // Mark hotspot discovered
+            hotspot.classList.add("discovered");
+
+            console.log("Evidence collected:", clue.title);
+
+            showEvidenceNotification(clue.title);
+
+        });
+
+        evidenceHotspotsContainer.appendChild(hotspot);
 
     });
 
-});
+    console.log("Evidence hotspots generated:", clues.length);
+}
+
+
 // ==================================
 // EVIDENCE DISCOVERY NOTIFICATION
 // ==================================
@@ -89,8 +99,11 @@ function showEvidenceNotification(title) {
     );
 
     if (!notification) {
+
         notification = document.createElement("div");
+
         notification.id = "evidence-notification";
+
         document.body.appendChild(notification);
     }
 

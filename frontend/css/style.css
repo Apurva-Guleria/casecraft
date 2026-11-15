@@ -563,24 +563,22 @@ body {
     box-shadow: 0 0 25px rgba(213, 183, 126, 0.8);
 }
 
-/* Position: Empty diamond case */
-.evidence-hotspot[data-clue="diamond-case"] {
+/* Dynamic evidence hotspot positions */
+
+.evidence-hotspot:nth-child(1) {
     top: 42%;
     left: 79%;
 }
 
-/* Position: Broken glass */
-.evidence-hotspot[data-clue="broken-glass"] {
+.evidence-hotspot:nth-child(2) {
+    top: 65%;
+    left: 55%;
+}
+
+.evidence-hotspot:nth-child(3) {
     top: 82%;
     left: 77%;
 }
-
-/* Position: Overturned chair */
-.evidence-hotspot[data-clue="overturned-chair"] {
-    top: 69%;
-    left: 56%;
-}
-
 
 
 /* =================================
@@ -691,4 +689,145 @@ body {
     font-family: Georgia, serif;
     font-size: 17px;
     margin-top: 10px;
+}
+
+
+/* ==================================
+   CASECRAFT - CINEMATIC CASE ARCHIVE
+================================== */
+
+#case-selection-screen {
+    min-height: 100vh;
+    width: 100%;
+    padding: 45px 6% 30px;
+
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(8, 10, 14, 0.45),
+            rgba(8, 10, 14, 0.15) 45%,
+            rgba(8, 10, 14, 0.65)
+        ),
+        url("../assets/case-archive-bg.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Archive heading */
+
+.case-selection-header {
+    text-align: center;
+    color: #e8d7b0;
+    margin-top: 10px;
+}
+
+.case-selection-header span {
+    font-size: 11px;
+    letter-spacing: 5px;
+    color: #c6a66b;
+}
+
+.case-selection-header h1 {
+    font-family: Georgia, serif;
+    font-size: clamp(38px, 5vw, 64px);
+    letter-spacing: 8px;
+    margin: 15px 0;
+    text-shadow: 0 4px 15px #000;
+}
+
+.case-selection-header p {
+    color: #d0c2a5;
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+/* Case files container */
+
+.case-list {
+    width: 100%;
+    max-width: 1200px;
+    margin: auto auto 35px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 25px;
+    align-items: end;
+}
+
+/* Individual case file */
+
+.case-card {
+    padding: 25px 20px;
+    min-height: 190px;
+
+    background: rgba(12, 15, 19, 0.88);
+    border: 1px solid rgba(198, 166, 107, 0.65);
+
+    color: #e8dcc3;
+    cursor: pointer;
+
+    transition: transform 0.35s ease,
+                background 0.35s ease,
+                border-color 0.35s ease;
+
+    backdrop-filter: blur(5px);
+}
+
+.case-card:hover {
+    transform: translateY(-10px);
+    background: rgba(25, 25, 23, 0.96);
+    border-color: #e0bd78;
+}
+
+.case-card h2 {
+    font-family: Georgia, serif;
+    font-size: 22px;
+    color: #e6c98f;
+    margin-bottom: 12px;
+}
+
+.case-card p {
+    color: #c4bba9;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.case-card .case-difficulty {
+    display: inline-block;
+    margin-top: 18px;
+    color: #c6a66b;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.archive-footer {
+    text-align: center;
+    color: #b39a6d;
+    font-size: 10px;
+    letter-spacing: 4px;
+}
+
+/* Responsive layout */
+
+@media (max-width: 800px) {
+    #case-selection-screen {
+        padding: 30px 5%;
+        overflow-y: auto;
+    }
+
+    .case-list {
+        grid-template-columns: 1fr;
+        margin-top: 35px;
+    }
+}
+
+/* Fix: Show archive when active */
+#case-selection-screen.active {
+    display: flex;
 }

@@ -83,33 +83,13 @@
         <div class="scene-image-container">
 
 
-<!-- CLICKABLE EVIDENCE LOCATIONS -->
+<!-- DYNAMIC EVIDENCE LOCATIONS -->
 
-<button
-    class="evidence-hotspot"
-    data-clue="diamond-case"
-    aria-label="Investigate empty diamond case"
-    title="Investigate">
-    <span>?</span>
-</button>
+<div id="evidence-hotspots">
 
-<button
-    class="evidence-hotspot"
-    data-clue="broken-glass"
-    aria-label="Investigate broken glass"
-    title="Investigate">
-    <span>?</span>
-</button>
+    <!-- Evidence hotspots will be generated dynamically -->
 
-<button
-    class="evidence-hotspot"
-    data-clue="overturned-chair"
-    aria-label="Investigate overturned chair"
-    title="Investigate">
-    <span>?</span>
-</button>
-
-
+</div>
             <div class="scene-overlay">
                 <p>THE CRIME SCENE</p>
                 <h2>Something is not right here...</h2>
@@ -138,6 +118,27 @@
 
 </section>
 
+
+<!-- CASE SELECTION SCREEN -->
+<section id="case-selection-screen" class="screen">
+
+    <div class="case-selection-header">
+        <span>CASECRAFT INVESTIGATION BUREAU</span>
+        <h1>CASE ARCHIVE</h1>
+        <p>Select an investigation to begin</p>
+    </div>
+
+    <div id="case-list" class="case-list">
+
+        <!-- Cases will be loaded dynamically from FastAPI -->
+
+    </div>
+
+    <div class="archive-footer">
+        CLASSIFIED INVESTIGATION FILES
+    </div>
+
+</section>
 
     </main>
 

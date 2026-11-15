@@ -1,4 +1,5 @@
 from fastapi import FastAPI,HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from backend.app.database import Base, engine,SessionLocal
 from backend.app.models import CaseDB, SuspectDB,ClueDB,InvestigationDB
@@ -48,6 +49,14 @@ app = FastAPI(
     title="CaseCraft API",
     description="Backend API for the CaseCraft mystery investigation game.",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5500"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 def seed_cases():
@@ -124,75 +133,74 @@ def seed_cases():
             db.add_all(sample_suspects)
             db.commit()
             
-        existing_clues = db.query(ClueDB).count()
+        
+        
+        # Add clues for Case 3: The Midnight Murder
+        existing_case_3_clues = db.query(ClueDB).filter(
+            ClueDB.case_id == 3
+        ).count()
 
-        if existing_clues == 0:
-            sample_clues = [
+        if existing_case_3_clues == 0:
+            midnight_murder_clues = [
                 ClueDB(
-                    id=1,
-                    case_id=1,
-                    title="Broken Glass",
-                    description="A broken glass piece was found near the diamond display.",
+                    id=5,
+                    case_id=3,
+                    title="The Broken Whiskey Glass",
+                    description="A shattered whiskey glass lies beside the victim's desk. Traces of an unknown substance are visible inside the glass.",
                     is_important=True
                 ),
                 ClueDB(
-                    id=2,
-                    case_id=1,
-                    title="Security Footage",
-                    description="A suspicious person was seen near the museum room.",
+                    id=6,
+                    case_id=3,
+                    title="The Torn Letter",
+                    description="A partially burned letter reveals a heated argument between the victim and someone close to him.",
                     is_important=True
                 ),
                 ClueDB(
-                    id=3,
-                    case_id=1,
-                    title="Visitor Register",
-                    description="The visitor register contains unusual entries.",
+                    id=7,
+                    case_id=3,
+                    title="The Stopped Clock",
+                    description="The grandfather clock stopped at exactly 11:45 PM, potentially revealing the time of the incident.",
                     is_important=False
-                ),
-                ClueDB(
-                    id=4,
-                    case_id=2,
-                    title="Last Phone Call",
-                    description="The missing witness received a mysterious phone call.",
-                    is_important=True
                 )
             ]
 
-            db.add_all(sample_clues)
+            db.add_all(midnight_murder_clues)
             db.commit()
             
-        existing_investigations = db.query(InvestigationDB).count()
+            
+        # Add investigation records for Case 3
+        existing_case_3_investigations = db.query(InvestigationDB).filter(
+            InvestigationDB.case_id == 3
+        ).count()
 
-        if existing_investigations == 0:
-            sample_investigations = [
+        if existing_case_3_investigations == 0:
+            case_3_investigations = [
                 InvestigationDB(
-                    id=1,
-                    case_id=1,
-                    clue_id=1,
-                    is_discovered=True
-                ),
-                InvestigationDB(
-                    id=2,
-                    case_id=1,
-                    clue_id=2,
+                    id=5,
+                    case_id=3,
+                    clue_id=5,
                     is_discovered=False
                 ),
                 InvestigationDB(
-                    id=3,
-                    case_id=1,
-                    clue_id=3,
+                    id=6,
+                    case_id=3,
+                    clue_id=6,
                     is_discovered=False
                 ),
                 InvestigationDB(
-                    id=4,
-                    case_id=2,
-                    clue_id=4,
-                    is_discovered=True
+                    id=7,
+                    case_id=3,
+                    clue_id=7,
+                    is_discovered=False
                 )
             ]
 
-            db.add_all(sample_investigations)
+            db.add_all(case_3_investigations)
             db.commit()
+
+
+        
 
     finally:
         db.close()
